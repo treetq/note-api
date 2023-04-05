@@ -14,7 +14,7 @@ module.exports = (mongoose) => {
       },
     },
     {
-      timestamp: true,
+      timestamps: true,
     }
   );
   return mongoose.model("Note", NoteSchema);
