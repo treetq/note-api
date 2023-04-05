@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const NoteSchema = require("./NoteModel");
 
 // module.exports  = mongoose // the default export
 
@@ -10,4 +11,6 @@ module.exports = {
       .then(() => console.log("Connected to the BD"))
       .catch((err) => console.log(err));
   },
+
+  NoteModel: NoteSchema(mongoose),
 };
