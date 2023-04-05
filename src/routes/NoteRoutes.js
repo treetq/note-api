@@ -34,4 +34,12 @@ module.exports = (app) => {
       data: note,
     });
   });
+
+  app.get("/notes", async (req, res, next) => {
+    const notes = await NoteModel.find({});
+    return res.status(200).json({
+      message: "Notes retrieved",
+      data: notes,
+    });
+  });
 };
