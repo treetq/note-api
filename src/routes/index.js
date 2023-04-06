@@ -1,4 +1,5 @@
 const noteRoutes = require("./NoteRoutes");
+const userRoutes = require("./AuthRoutes");
 
 module.exports = (app) => {
   app.get("/status", (req, res, next) => {
@@ -6,4 +7,5 @@ module.exports = (app) => {
   });
 
   noteRoutes(app);
+  userRoutes(app);
 };
