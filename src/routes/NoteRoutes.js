@@ -1,8 +1,13 @@
 const { json } = require("body-parser");
 const { NoteModel } = require("../db");
+const { requireSession } = require("../middlewares/requireSessionMiddleware");
 
 module.exports = (app) => {
-  app.post("/notes", async (req, res, next) => {
+  app.post("/notes", requireSession, async (req, res, next) => {
+    const session = res.locals.session;
+
+    // return res.json(session);
+
     const { title, content } = req.body;
     if (!title || !content) {
       // validation user input  or use ZOD REMEMMMMBEEERRRR
@@ -16,7 +21,6 @@ module.exports = (app) => {
         message: "title is too long max 50 characters",
       });
     }
-
     // USE THIS METHOD
     /* const note = new NoteModel({
          title,
@@ -28,6 +32,7 @@ module.exports = (app) => {
     const note = await NoteModel.create({
       title: title.trim(),
       content: content.trim(),
+      user: session.user,
     });
     return res.status(201).json({
       message: "Note created",
@@ -35,17 +40,24 @@ module.exports = (app) => {
     });
   });
 
-  app.get("/notes", async (req, res, next) => {
-    const notes = await NoteModel.find({});
+  app.get("/notes", requireSession, async (req, res, next) => {
+    const session = res.locals.session;
+    const notes = await NoteModel.find({
+      user: session.user,
+    });
     return res.status(200).json({
       message: "Notes retrieved",
       data: notes,
     });
   });
 
-  app.get("/note/:id", async (req, res, next) => {
+  app.get("/note/:id", requireSession, async (req, res, next) => {
+    const session = res.locals.session;
     const { id } = req.params;
-    const note = await NoteModel.findById(id);
+    const note = await NoteModel.findOne({
+      _id: id,
+      user: session.user,
+    });
 
     if (!note) {
       return res.status(404).json({
@@ -58,8 +70,10 @@ module.exports = (app) => {
     });
   });
 
-  app.put("/notes/:id", async (req, res, next) => {
+  app.put("/notes/:id", requireSession, async (req, res, next) => {
     const { id } = req.params;
+    const session = res.locals.session;
+
     const { title, content } = req.body;
 
     if (!title && !content) {
@@ -74,7 +88,10 @@ module.exports = (app) => {
       });
     }
 
-    const note = await NoteModel.findById(id);
+    const note = await NoteModel.findOne({
+      _id: id,
+      user: session.user,
+    });
 
     if (!note) {
       return res.status(404).json({
@@ -94,12 +111,19 @@ module.exports = (app) => {
     });
   });
 
-  app.delete("/notes/:id", async (req, res, next) => {
+  app.delete("/notes/:id", requireSession, async (req, res, next) => {
+    const session = res.locals.session;
     const { id } = req.params;
 
     console.error(id);
 
-    let note = await NoteModel.findById(id);
+    let note = await NoteModel.findOneAndDelete({
+      _id: id,
+      user: session.user,
+    }).catch((e) => {
+      console.log(e);
+    });
+
     if (!note) {
       return res.status(404).json({
         message: "Note not found",
